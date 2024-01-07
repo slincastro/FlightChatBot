@@ -1,0 +1,11 @@
+*.pyc
+.DS_Store
+__pycache__
+*/venv/
+Azure_Dev_Ops_Queries/.coverage
+.idea/
+Azure_Dev_Ops_Queries/__pycache_
+Azure_Dev_Ops_Queries/src/app/config.yaml
+config.yaml
+*.csv
+requirements.txt
