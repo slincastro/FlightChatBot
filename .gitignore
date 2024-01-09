@@ -9,3 +9,4 @@ Azure_Dev_Ops_Queries/src/app/config.yaml
 config.yaml
 *.csv
 requirements.txt
+model

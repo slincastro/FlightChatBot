@@ -1,51 +1,95 @@
 import spacy
 from spacy.matcher import Matcher
-import traductores_de_apoyo.extractor_fechas as extractor
+import extractors.date_extractor as date_extractor
+import extractors.airline_extractor as airline_extractor
 
+import flight_matcher as fm
 nlp = spacy.load("es_core_news_sm")
 
 
-matcher = Matcher(nlp.vocab)
+def extract_locations(doc):
 
-pattern_reservar = [{"LOWER": "reservar"}, {"LOWER": "vuelo"}]
-pattern_cancelar = [{"LOWER": "cancelar"}, {"LOWER": "reserva"}]
-matcher.add("RESERVAR_VUELO", [pattern_reservar])
-matcher.add("CANCELAR_RESERVA", [pattern_cancelar])
+    ubicaciones = [ent for ent in doc.ents if ent.label_ == "LOC"]
+    preposiciones_origen = ["de", "desde", "partiendo de", "saliendo de"]
+    preposiciones_destino = ["a", "hasta", "hacia", "para"]
 
-# Función para procesar la entrada del usuario
+    origen, destino = None, None
+
+
+    for ubicacion in ubicaciones:
+
+        preposicion = doc[ubicacion.start - 1].text.lower() if ubicacion.start > 0 else ''
+    
+        if preposicion in preposiciones_origen:
+            origen = ubicacion.text
+        elif preposicion in preposiciones_destino:
+            destino = ubicacion.text
+
+    print(f"Origen: {origen}, Destino: {destino}")
+    return origen, destino
+
+def extract_ticket_number(doc):
+    # Inicializar la variable para el número de boletos
+    num_boletos = None
+
+    # Buscar entidades numéricas seguidas por la palabra "boletos"
+    for token in doc:
+        if token.text.lower() in ["boleto","boletos" ,"ticket" ,"tickets" ,'pasaje' , 'pasajes','asiento' ,'asientos', 'vuelo', 'vuelos']:
+            # Verificar si el token anterior es un número
+            index = token.i - 1
+            if doc[index].is_digit:
+                num_boletos = int(doc[index].text)
+                break
+
+    print(f"Número de boletos: {num_boletos}")
+    return num_boletos
+
 def process_input(user_input):
     
+    llamada = {
+        "origen":"",
+        "destino":"",
+        "fecha":"",
+        "cantidad":"",
+        "aerolinea":""
+    }
+    
+    aerolinea = airline_extractor.AirlineExtractor().extract(user_input)
+    
+    llamada["aerolinea"]=aerolinea[0]
     doc = nlp(user_input)
     
-    fecha = extractor.ExtractorFechas().extraer_fecha(user_input)
-    print(fecha)
+    fecha = date_extractor.ExtractorFechas().extraer_fechas(user_input)
     
+    llamada["fecha"]=fecha[0]
+    
+    origen, destino = extract_locations(doc)
+    llamada["origen"] = origen
+    llamada["destino"] = destino
+    
+    cantidad = extract_ticket_number(doc)
+    llamada["cantidad"] = cantidad
+    
+    extract_ticket_number(doc)
+       
     stop_words_modificadas = nlp.Defaults.stop_words - {"de", "a", "desde", "hasta", "hacia"}
 
-    # Eliminando puntuación y convirtiendo a minúsculas
     tokens_limpios = [token.text.lower() for token in doc if not token.is_punct]
     print("="*30)
     print(tokens_limpios)
-    # Eliminando stop words (palabras comunes)
+
+
     tokens_sin_stopwords = [token.text.lower() for token in doc if token.text.lower() not in stop_words_modificadas]
 
     print(tokens_sin_stopwords)
     
-    matches = matcher(doc)
-
-    # Identificar intención
-    for match_id, start, end in matches:
-        rule_id = nlp.vocab.strings[match_id]
-        if rule_id == "RESERVAR_VUELO":
-            return handle_reservar_vuelo(doc)
-        elif rule_id == "CANCELAR_RESERVA":
-            return handle_cancelar_reserva(doc)
-
-    # Extracción de entidades comunes
     for ent in doc.ents:
         print(f"{ent.text} - {ent.label_}")
-
-    return "No estoy seguro de cómo ayudar con eso."
+        
+    print(llamada)
+    
+    
+    return handle_reservar_vuelo(doc)
 
 # Funciones para manejar intenciones específicas
 def handle_reservar_vuelo(doc):
