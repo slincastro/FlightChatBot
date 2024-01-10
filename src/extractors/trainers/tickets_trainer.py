@@ -30,7 +30,15 @@ oraciones_base = [
     "{} tickets",
     "{} boletos",
     "{}",
-    "{} asientos"
+    "{} asientos",
+    "quiero reservar {} tickets",
+    "quiero reservar {} boletos",
+    "quiero reservar {}",
+    "quiero reservar {} asientos",
+    "necesito comprar {} tickets",
+    "necesito comprar {} boletos",
+    "necesito comprar {}",
+    "necesito comprar {} asientos",
 ]
 
 for _ in range(500):  
@@ -50,7 +58,7 @@ if "ner" not in nlp.pipe_names:
 else:
     ner = nlp.get_pipe("ner")
 
-ner.add_label("AEROLINEA")
+ner.add_label("NUMEROTICKETS")
 
 other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
 

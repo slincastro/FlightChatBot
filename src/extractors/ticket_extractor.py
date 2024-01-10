@@ -1,13 +1,13 @@
 import spacy
 import re
-import dictionaries.numbers as numbers
 
 class TicketExtractor:
     def __init__(self, llamada_reserva):
-        self.nlp = spacy.load("es_core_news_sm")
+        
         self.llamada_reserva = llamada_reserva
     
     def extract(self, text):
+        self.nlp = spacy.load("es_core_news_sm")
         num_boletos = None
         doc = self.nlp(text)
         for token in doc:
@@ -19,15 +19,72 @@ class TicketExtractor:
         self.llamada_reserva["cantidad"] = num_boletos
         return num_boletos
     
+    def get_text_numbers(self):
+        diccionario = {
+            'uno': 1,
+            'dos': 2,
+            'tres': 3,
+            'cuatro': 4,
+            'cinco': 5,
+            'seis': 6,
+            'siete': 7,
+            'ocho': 8,
+            'nueve': 9,
+            'diez': 10,
+            'once': 11,
+            'doce': 12,
+            'trece': 13,
+            'catorce': 14,
+            'quince': 15,
+            'dieciséis': 16,
+            'diecisiete': 17,
+            'dieciocho': 18,
+            'diecinueve': 19,
+            'veinte': 20,
+            'veintiuno': 21,
+            'veintidós': 22,
+            'veintitrés': 23,
+            'veinticuatro': 24,
+            'veinticinco': 25,
+            'veintiséis': 26,
+            'veintisiete': 27,
+            'veintiocho': 28,
+            'veintinueve': 29,
+            'treinta': 30,
+            'treinta y uno': 31,
+            'treinta y dos': 32,
+            'treinta y tres': 33,
+            'treinta y cuatro': 34,
+            'treinta y cinco': 35,
+            'treinta y seis': 36,
+            'treinta y siete': 37,
+            'treinta y ocho': 38,
+            'treinta y nueve': 39,
+            'cuarenta': 40,
+            'cuarenta y uno': 41,
+            'cuarenta y dos': 42,
+            'cuarenta y tres': 43,
+            'cuarenta y cuatro': 44,
+            'cuarenta y cinco': 45,
+            'cuarenta y seis': 46,
+            'cuarenta y siete': 47,
+            'cuarenta y ocho': 48,
+            'cuarenta y nueve': 49,
+            'cincuenta': 50
+        } 
+        
+        return diccionario
+    
     def specific_extraction(self, text):
         
-        diccionario = numbers.get_text_numbers()
+        diccionario = self.get_text_numbers()
         
-        self.modelo = spacy.load("./ticket-model")
-        doc = self.modelo(text)
+        modelo = spacy.load("./ticket-model")
+        doc = modelo(text)
         tickets = [ent.text for ent in doc.ents]
+        print(tickets)
+        print(doc.ents)
         number = diccionario[tickets[0]]
         return number
-        
-number = TicketExtractor({"cantidad":None}).specific_extraction("Quiero reservar dos boletos")
-print(number)
+#number = TicketExtractor({"cantidad":None}).specific_extraction("Quiero reservar dos boletos")
+#print(number)
