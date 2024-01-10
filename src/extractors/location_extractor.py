@@ -1,8 +1,9 @@
 import spacy
 
 class LocationExtractor:
-    def __init__(self):
+    def __init__(self, llamada_reserva):
         self.nlp = spacy.load("es_core_news_sm")
+        self.llamada_reserva = llamada_reserva
 
     def extract(self, text):
         doc = self.nlp(text)
@@ -22,4 +23,7 @@ class LocationExtractor:
             elif preposicion in preposiciones_destino:
                 destino = ubicacion.text
 
+        self.llamada_reserva["origen"] = origen
+        self.llamada_reserva["destino"] = destino
+        
         return origen, destino
