@@ -8,6 +8,12 @@ pip install SpeechRecognition pyaudio
 
 brew install portaudio
 
+pip install word2number
+
+pip install inflect
+
+pip install num2words
+
 
 Ejecucion :
 Ejecutar el archivo src/chat_bot.py

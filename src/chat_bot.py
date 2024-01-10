@@ -36,30 +36,35 @@ def validate(request_llamada):
         user_input = listen()
         aerolinea = airline_extractor.AirlineExtractor(request_llamada).extract(user_input)
         request_llamada["aerolinea"] = aerolinea
+        print(request_llamada)
     
     if request_llamada["fecha"] == None :
         speak("Cual es la fecha de su vuelo ?")
         user_input = listen()
         fecha = date_extractor.DateExtractor(request_llamada).extract(user_input)
         request_llamada["fecha"] = fecha
+        print(request_llamada)
         
     if request_llamada["origen"] == None :
         speak("Cual es la ciudad de partida de su vuelo ?")
         user_input = listen()
         origen, destino = location_extractor.LocationExtractor(request_llamada).extract(user_input)
         request_llamada["origen"] = origen
+        print(request_llamada)
         
     if request_llamada["destino"] == None :
         speak("Cual es la ciudad de destino de su vuelo ?")
         user_input = listen()
         origen, destino = location_extractor.LocationExtractor(request_llamada).extract(user_input)
         request_llamada["destino"] = destino
+        print(request_llamada)
         
     if request_llamada["cantidad"] == None :
         speak("Cuantos boletos desea reservar ?")
         user_input = listen()
         cantidad = ticket_extractor.TicketExtractor(request_llamada).extract(user_input)
         request_llamada["cantidad"] = cantidad
+        print(request_llamada)
         
     return request_llamada
 

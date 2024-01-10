@@ -58,6 +58,7 @@ oraciones_base = [
 
 for _ in range(1000):  
     aerolinea = random.choice(nombres_aerolineas)
+    aerolinea = aerolinea.lower()
     oracion = random.choice(oraciones_base).format(aerolinea)
     inicio = oracion.find(aerolinea)
     fin = inicio + len(aerolinea)

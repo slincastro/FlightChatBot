@@ -1,4 +1,6 @@
 import spacy
+import re
+import dictionaries.numbers as numbers
 
 class TicketExtractor:
     def __init__(self, llamada_reserva):
@@ -16,3 +18,16 @@ class TicketExtractor:
                     break
         self.llamada_reserva["cantidad"] = num_boletos
         return num_boletos
+    
+    def specific_extraction(self, text):
+        
+        diccionario = numbers.get_text_numbers()
+        
+        self.modelo = spacy.load("./ticket-model")
+        doc = self.modelo(text)
+        tickets = [ent.text for ent in doc.ents]
+        number = diccionario[tickets[0]]
+        return number
+        
+number = TicketExtractor({"cantidad":None}).specific_extraction("Quiero reservar dos boletos")
+print(number)
