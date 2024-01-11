@@ -82,9 +82,7 @@ class TicketExtractor:
         modelo = spacy.load("./ticket-model")
         doc = modelo(text)
         tickets = [ent.text for ent in doc.ents]
-        print(tickets)
-        print(doc.ents)
+        if len(tickets) == 0:
+            return None
         number = diccionario[tickets[0]]
         return number
-#number = TicketExtractor({"cantidad":None}).specific_extraction("Quiero reservar dos boletos")
-#print(number)
