@@ -11,8 +11,9 @@ class FlightListener:
             
         try:
             texto = self.recognizer.recognize_google(audio, language="es-ES")
-            print("Creo que dijiste: " + texto)
+            print("Parece que dijiste: " + texto)
             return texto
+        
         except sr.UnknownValueError:
             print("No entendí lo que dijiste.")
         except sr.RequestError as e:

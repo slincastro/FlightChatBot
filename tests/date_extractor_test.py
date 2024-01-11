@@ -1,5 +1,4 @@
 from src.extractors import date_extractor as extractor
-import pytest
 
 llamada = {"fecha":None}
 
