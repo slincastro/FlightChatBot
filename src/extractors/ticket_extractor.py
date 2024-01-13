@@ -77,10 +77,12 @@ class TicketExtractor:
     
     def specific_extraction(self, text):
         
-        numero = re.search(r'\d+', text)
-        
-        if numero:
-            return int(numero.group())
+        numeros = re.findall(r'\d+', text)
+
+        if numeros:
+            numero_vuelos = numeros[0]
+            self.llamada_reserva["cantidad"] = numero_vuelos
+            return numero_vuelos
         
         diccionario = self.get_text_numbers()
         

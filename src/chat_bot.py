@@ -4,7 +4,7 @@ import extractors.date_extractor as date_extractor
 import extractors.airline_extractor as airline_extractor
 import extractors.location_extractor as location_extractor
 import extractors.ticket_extractor as ticket_extractor
-import extractors.domain.reserve as reserve
+import domain.reserve as reserve
 from driven_adapters.airport_client import AirportClient
 
 import flight_speaker as fs
@@ -22,30 +22,40 @@ def search_airports(request_llamada):
     ]
     
     iata_codes = {"origen": "IATA_FROM", "destino": "IATA_TO"}
-    print("searching for airports ...")
     
     for extractor in individual_extractors:
-        #if extractor.nombre == "origen":
-            airports = get_airports(request_llamada[extractor.nombre])
-            print("searching for airports ...")
-            if airports is None:
-                speak("Disculpa no encontramos un aeropuerto para tu vuelo , podrias decidir otra ciudad"+ extractor.question)
-                user_input = input("Tú: ")
-                extractor.extractor(user_input)
-                print(request_llamada)
+        airports = get_airports(request_llamada[extractor.nombre])
 
-            elif len(airports) > 1:
-                request_llamada[iata_codes[extractor.nombre]] = airports[0]["iata"]
-            else:
-                for airport in airports:
-                    if request_llamada[iata_codes[extractor.nombre]] == airport["city"]:
-                        request_llamada[iata_codes[extractor.nombre]] = airport["iata"]
-         
+        airports_in_city = [airport for airport in airports if airport["city"].lower() == request_llamada[extractor.nombre].lower()]
+        
+        if airports_in_city is None or len(airports_in_city) == 0:
+            speak("Disculpa no encontramos un aeropuerto para tu vuelo , podrias decidir otra ciudad"+ extractor.question)
+            user_input = input("Tú: ")
+            extractor.extractor(user_input)
+            print(request_llamada)
+
+        elif len(airports_in_city) == 1:
+            request_llamada[iata_codes[extractor.nombre]] = airports[0]["iata"]
+        else:
+            airports_codes = {}
+            speak("Disculpa encontramos mas de un aeropuerto para tu vuelo , podrias decidir entre los siguientes, para decidir recuerda el numero del aeropuerto :")
+            count = 1
+            for airport in airports_in_city:
+                airports_codes["name"] = airport["name"]
+                airports_codes["number"] = count
+                airports_codes["iata"] = airport["iata"]
+                speak(str(count) + " " + airport["name"])
+                
+                count += 1
+                
     
 def get_airports(text):
+    #TODO: get api_key and api_secret from environment variables
     api_key = '098aad84c5'
     api_secret ='c12d1f455daa01a'
-    
+   # api_key = '3ef88b63e1'
+   # api_secret = 'e406df83ea63f72'
+
     informacion_aeropuertos, airports_number = AirportClient(api_key, api_secret).get_airport_values(text)
 
     if airports_number == 0:
@@ -60,7 +70,6 @@ def listen():
     user_input = fl.FlightListener().listen()
     return user_input.lower()
     
-
 def speak(mensaje):
     if is_talked:
         fs.FlightSpeaker().speak(mensaje)
@@ -73,7 +82,6 @@ def process_retry(extractor, request_llamada, mensaje):
     print(request_llamada)   
     
 def is_complete(request_llamada):
-
     none_found = False
     for key, value in request_llamada.items():
         if value is None:
@@ -83,10 +91,10 @@ def is_complete(request_llamada):
 
 def validate(request_llamada):
     individual_extractors = [
-        reserve.Reserve("aerolinea", airline_extractor.AirlineExtractor(request_llamada).extract, "Cual es la aerolinea de su vuelo ?"),
-        reserve.Reserve("fecha", date_extractor.DateExtractor(request_llamada).extract, "Cual es la fecha de su vuelo ?"),
-        reserve.Reserve("origen", location_extractor.LocationExtractor(request_llamada).extract_origen, "Cual es la ciudad de partida de su vuelo ?"),
-        reserve.Reserve("destino", location_extractor.LocationExtractor(request_llamada).extract_destino,   "Cual es la ciudad de destino de su vuelo ?"),
+        reserve.Reserve("aerolinea", airline_extractor.AirlineExtractor(request_llamada).extract, "En que Aerolinea te gustaria viajar ?"),
+        reserve.Reserve("fecha", date_extractor.DateExtractor(request_llamada).extract, "En que fecha te gustaria viajar ?"),
+        reserve.Reserve("origen", location_extractor.LocationExtractor(request_llamada).extract_origen, "Desde donde saldria tu vuelo ?"),
+        reserve.Reserve("destino", location_extractor.LocationExtractor(request_llamada).extract_destino,   "Hacia que ciudad viajas ?"),
         reserve.Reserve("cantidad", ticket_extractor.TicketExtractor(request_llamada).specific_extraction, "Cuantos boletos desea reservar ?")
     ]
     
@@ -150,7 +158,8 @@ if is_talked:
     fs.FlightSpeaker().speak(mensaje)
     user_input = listen()
 else:
-    user_input = input("Tú: ")
+    user_input = "quiero 3 vuelos para viajar de london a quito el 4 de marzo por avianca"
+    #user_input = input("Tú: ")
 #user_input = input("Tú: ")
 #if user_input.lower() == "salir":
     #break
