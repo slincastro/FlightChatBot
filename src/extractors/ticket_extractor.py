@@ -77,6 +77,11 @@ class TicketExtractor:
     
     def specific_extraction(self, text):
         
+        numero = re.search(r'\d+', text)
+        
+        if numero:
+            return int(numero.group())
+        
         diccionario = self.get_text_numbers()
         
         modelo = spacy.load("./ticket-model")

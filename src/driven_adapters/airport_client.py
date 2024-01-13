@@ -23,7 +23,7 @@ class AirportClient:
         else:
             return None
         
-    def get_values(self, city):
+    def get_airport_values(self, city):
         response = self.search_airports(city)
         airports_number = len(response['airports'])
         informacion_aeropuertos = [{'iata': aeropuerto['iata'], 'city': aeropuerto['city'], 'name': aeropuerto['name']} for aeropuerto in response['airports']]

@@ -13,17 +13,19 @@ import flight_matcher as fm
 import time
 
 nlp = spacy.load("es_core_news_sm")
-is_talked = True
+is_talked = False
 
 def search_airports(request_llamada):
     individual_extractors = [
         reserve.Reserve("origen", location_extractor.LocationExtractor(request_llamada).extract_origen, "Cual es la ciudad de partida de su vuelo ?"),
         reserve.Reserve("destino", location_extractor.LocationExtractor(request_llamada).extract_destino,   "Cual es la ciudad de destino de su vuelo ?")
     ]
+    
+    iata_codes = {"origen": "IATA_FROM", "destino": "IATA_TO"}
     print("searching for airports ...")
     
     for extractor in individual_extractors:
-        if extractor.nombre == "origen":
+        #if extractor.nombre == "origen":
             airports = get_airports(request_llamada[extractor.nombre])
             print("searching for airports ...")
             if airports is None:
@@ -31,20 +33,20 @@ def search_airports(request_llamada):
                 user_input = input("Tú: ")
                 extractor.extractor(user_input)
                 print(request_llamada)
-                times = 0
+
             elif len(airports) > 1:
-                request_llamada["IATA_FROM"] = airports[0]["IATA"]
+                request_llamada[iata_codes[extractor.nombre]] = airports[0]["iata"]
             else:
                 for airport in airports:
-                    if request_llamada["origen"] == airport["city"]:
-                        request_llamada["IATA_FROM"] = airport["IATA"]
+                    if request_llamada[iata_codes[extractor.nombre]] == airport["city"]:
+                        request_llamada[iata_codes[extractor.nombre]] = airport["iata"]
          
     
 def get_airports(text):
     api_key = '098aad84c5'
     api_secret ='c12d1f455daa01a'
     
-    informacion_aeropuertos, airports_number = AirportClient(api_key, api_secret).get_airport(text)
+    informacion_aeropuertos, airports_number = AirportClient(api_key, api_secret).get_airport_values(text)
 
     if airports_number == 0:
         return None
