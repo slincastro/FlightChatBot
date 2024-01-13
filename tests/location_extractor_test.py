@@ -43,3 +43,10 @@ def test_should_return_from_santiago_to_guayaquil_when_ask_for_travel_from_santi
     
     assert origen == "Santiago"
     assert destino == "Guayaquil"
+    
+def test_should_send_destination_when_ask_for_travel_from_santiago_to_guayaquil():
+    text = "quiero viajar a Guayaquil desde Santiago"
+    llamada_reserva = {"origen":None, "destino":None}
+    LocationExtractor(llamada_reserva).extract(text)
+    
+    assert llamada_reserva["destino"] == "Guayaquil"

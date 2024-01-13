@@ -32,7 +32,7 @@ class LocationExtractor:
         ubicaciones = [ent for ent in doc.ents if ent.label_ == "LOC"]
         preposiciones_origen = ["de", "desde", "partiendo de", "saliendo de"]
         origen = None
-
+        print(ubicaciones)
         for ubicacion in ubicaciones:
             preposicion = doc[ubicacion.start - 1].text.lower() if ubicacion.start > 0 else ''
             if preposicion in preposiciones_origen:
@@ -47,9 +47,10 @@ class LocationExtractor:
         destino = None
 
         for ubicacion in ubicaciones:
-            if doc.tokens == 1: 
-                destino = ubicacion.text
-                break
+            if hasattr(doc, 'tokens'):
+                if doc.tokens == 1: 
+                    destino = ubicacion.text
+                    break
             preposicion = doc[ubicacion.start - 1].text.lower() if ubicacion.start > 0 else ''
             if preposicion in preposiciones_destino:
                 destino = ubicacion.text

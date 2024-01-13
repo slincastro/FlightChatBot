@@ -85,6 +85,8 @@ class TicketExtractor:
         print(tickets)
         if len(tickets) == 0:
             return None
+        if tickets[0] not in diccionario:
+            return None
         number = diccionario[tickets[0]]
         self.llamada_reserva["cantidad"] = number
         return number

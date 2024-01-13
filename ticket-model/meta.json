@@ -495,9 +495,9 @@
 
     ],
     "ner":[
-      "AEROLINEA",
       "LOC",
       "MISC",
+      "NUMEROTICKETS",
       "ORG",
       "PER",
       "TICKETS"
