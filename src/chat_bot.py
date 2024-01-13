@@ -4,13 +4,13 @@ import extractors.date_extractor as date_extractor
 import extractors.airline_extractor as airline_extractor
 import extractors.location_extractor as location_extractor
 import extractors.ticket_extractor as ticket_extractor
+import extractors.airport_extractor as airport_extractor
 import domain.reserve as reserve
 from driven_adapters.airport_client import AirportClient
-
+from googletrans import Translator
 import flight_speaker as fs
 import flight_listener as fl
 import flight_matcher as fm
-import time
 
 nlp = spacy.load("es_core_news_sm")
 is_talked = False
@@ -24,9 +24,13 @@ def search_airports(request_llamada):
     iata_codes = {"origen": "IATA_FROM", "destino": "IATA_TO"}
     
     for extractor in individual_extractors:
-        airports = get_airports(request_llamada[extractor.nombre])
+        
+        translated_city = Translator().translate(request_llamada[extractor.nombre], src='es', dest='en')
+        print(translated_city.text)
+        
+        airports = get_airports(translated_city.text)
 
-        airports_in_city = [airport for airport in airports if airport["city"].lower() == request_llamada[extractor.nombre].lower()]
+        airports_in_city = [airport for airport in airports if airport["city"].lower() == translated_city.text.lower()]
         
         if airports_in_city is None or len(airports_in_city) == 0:
             speak("Disculpa no encontramos un aeropuerto para tu vuelo , podrias decidir otra ciudad"+ extractor.question)
@@ -37,18 +41,36 @@ def search_airports(request_llamada):
         elif len(airports_in_city) == 1:
             request_llamada[iata_codes[extractor.nombre]] = airports[0]["iata"]
         else:
-            airports_codes = {}
-            speak("Disculpa encontramos mas de un aeropuerto para tu vuelo , podrias decidir entre los siguientes, para decidir recuerda el numero del aeropuerto :")
+            airports_codes = []
+            speak("Disculpa encontramos mas de un aeropuerto para tu vuelo " + extractor.nombre + ", podrias decidir entre los siguientes, para decidir recuerda el numero del aeropuerto :")
             count = 1
+            
             for airport in airports_in_city:
-                airports_codes["name"] = airport["name"]
-                airports_codes["number"] = count
-                airports_codes["iata"] = airport["iata"]
+                airport_code = {}
+                airport_code["name"] = airport["name"]
+                airport_code["number"] = count
+                airport_code["iata"] = airport["iata"]
+                
+                airports_codes.append(airport_code)
                 speak(str(count) + " " + airport["name"])
                 
                 count += 1
                 
-    
+            texto_aeropuerto = listen()
+            numero_aeropuerto = airport_extractor.AirportExtractor(None).specific_extraction(texto_aeropuerto) 
+            print(numero_aeropuerto)
+            
+            if numero_aeropuerto is None:
+                speak("Disculpa no entendi, podrias repetir el numero del aeropuerto")
+                user_input = input("Tú: ")
+                airport_extractor.AirportExtractor(None).specific_extraction(user_input)
+                print(request_llamada)
+                
+            numero_aeropuerto = int(numero_aeropuerto)
+            print(airports_codes[numero_aeropuerto - 1])
+            request_llamada[iata_codes[extractor.nombre]] = airports_codes[numero_aeropuerto - 1]["iata"]
+            
+            
 def get_airports(text):
     #TODO: get api_key and api_secret from environment variables
     api_key = '098aad84c5'
@@ -158,7 +180,7 @@ if is_talked:
     fs.FlightSpeaker().speak(mensaje)
     user_input = listen()
 else:
-    user_input = "quiero 3 vuelos para viajar de london a quito el 4 de marzo por avianca"
+    user_input = "quiero 3 vuelos para viajar de londres a quito el 4 de marzo por avianca"
     #user_input = input("Tú: ")
 #user_input = input("Tú: ")
 #if user_input.lower() == "salir":

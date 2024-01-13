@@ -19,6 +19,7 @@ class AirportClient:
         response = requests.get(url, headers=headers, params=params)
         if response.status_code == 200:
             airports = response.json()
+            print(airports)
             return airports
         else:
             return None
