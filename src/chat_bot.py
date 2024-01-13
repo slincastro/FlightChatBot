@@ -13,13 +13,38 @@ import flight_matcher as fm
 import time
 
 nlp = spacy.load("es_core_news_sm")
-is_talked = False
+is_talked = True
 
+def search_airports(request_llamada):
+    individual_extractors = [
+        reserve.Reserve("origen", location_extractor.LocationExtractor(request_llamada).extract_origen, "Cual es la ciudad de partida de su vuelo ?"),
+        reserve.Reserve("destino", location_extractor.LocationExtractor(request_llamada).extract_destino,   "Cual es la ciudad de destino de su vuelo ?")
+    ]
+    print("searching for airports ...")
+    
+    for extractor in individual_extractors:
+        if extractor.nombre == "origen":
+            airports = get_airports(request_llamada[extractor.nombre])
+            print("searching for airports ...")
+            if airports is None:
+                speak("Disculpa no encontramos un aeropuerto para tu vuelo , podrias decidir otra ciudad"+ extractor.question)
+                user_input = input("Tú: ")
+                extractor.extractor(user_input)
+                print(request_llamada)
+                times = 0
+            elif len(airports) > 1:
+                request_llamada["IATA_FROM"] = airports[0]["IATA"]
+            else:
+                for airport in airports:
+                    if request_llamada["origen"] == airport["city"]:
+                        request_llamada["IATA_FROM"] = airport["IATA"]
+         
+    
 def get_airports(text):
     api_key = '098aad84c5'
     api_secret ='c12d1f455daa01a'
     
-    informacion_aeropuertos, airports_number = AirportClient().get_airport(text)
+    informacion_aeropuertos, airports_number = AirportClient(api_key, api_secret).get_airport(text)
 
     if airports_number == 0:
         return None
@@ -79,22 +104,6 @@ def validate(request_llamada):
                 message = "Disculpa No entendi, puedes repetir "+ extractor.question
                 process_retry(extractor, request_llamada, message)
                 times += 1      
-        else :
-            if request_llamada[extractor.nombre] == "origen":
-                airports = get_airports(request_llamada[extractor.nombre])
-                print("searching for airports ...")
-                if airports is None:
-                    speak("Disculpa no encontramos un aeropuerto para tu vuelo , podrias decidir otra ciudad"+ extractor.question)
-                    user_input = input("Tú: ")
-                    extractor.extractor(user_input)
-                    print(request_llamada)
-                    times = 0
-                elif len(airports) > 1:
-                    request_llamada["IATA_FROM"] = airports[0]["IATA"]
-                else:
-                    for airport in airports:
-                        if request_llamada["origen"] == airport["city"]:
-                            request_llamada["IATA_FROM"] = airport["IATA"]
             
 
 def process_input(user_input):
@@ -121,8 +130,7 @@ def process_input(user_input):
     while not is_complete(llamada):
         validate(llamada)
     
-    while 
-    
+    search_airports(llamada)
     
     speak("Queremos confirmar los datos de su vuelo :")
     speak("Quieres comprar " + str(llamada["cantidad"]) + " boletos, para el " + llamada["fecha"] + ", por la aerolina " + llamada["aerolinea"] + ", partiendo de " + llamada["origen"] + ", hacia " + llamada["destino"])
