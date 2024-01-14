@@ -19,7 +19,7 @@ class AirportClient:
         response = requests.get(url, headers=headers, params=params)
         if response.status_code == 200:
             airports = response.json()
-            print(airports)
+
             return airports
         else:
             return None
@@ -30,21 +30,3 @@ class AirportClient:
         informacion_aeropuertos = [{'iata': aeropuerto['iata'], 'city': aeropuerto['city'], 'name': aeropuerto['name']} for aeropuerto in response['airports']]
         
         return informacion_aeropuertos, airports_number
-
-        
-      
-#api_key = '098aad84c5'
-#api_secret ='c12d1f455daa01a'
-
-#airports = AirportClient(api_key, api_secret).search_airports('ecua')
-
-# Extraer el número de aeropuertos
-#numero_de_aeropuertos = len(airports['airports'])
-#print("Número de aeropuertos encontrados:", numero_de_aeropuertos)
-
-# Listar los nombres de los aeropuertos
-#nombres_de_aeropuertos = [aeropuerto['name'] for aeropuerto in airports['airports']]
-#print("Nombres de los aeropuertos:")
-#for nombre in nombres_de_aeropuertos:
-#    print(nombre)
-#print(airports)
