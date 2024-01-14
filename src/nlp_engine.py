@@ -10,7 +10,8 @@ from driven_adapters.airport_client import AirportClient
 from googletrans import Translator
 import flight_speaker as fs
 import flight_listener as fl
-import flight_matcher as fm
+import dateparser 
+import json
 
 nlp = spacy.load("es_core_news_sm")
 is_talked = False
@@ -212,10 +213,13 @@ def process_input(user_input):
     search_airports(llamada)
     
     speak("Queremos confirmar los datos de su vuelo :")
-    speak("Quieres comprar " + str(llamada["cantidad"]) + " boletos, para el " + llamada["fecha"] + ", por la aerolina " + llamada["aerolinea"] + ", partiendo de " + llamada["origen"] + ", hacia " + llamada["destino"])
-    speak("Es correcto ?")                
-                       
-    print(llamada)
+    speak("Quieres comprar " + str(llamada["cantidad"]) + " boletos, para el " + llamada["fecha"] + ", por la aerolina " + llamada["aerolinea"] + ", partiendo de " + llamada["origen"] + ", hacia " + llamada["destino"])               
+    
+    llamada["fecha"] = dateparser.parse(llamada["fecha"], languages=['es']).strftime("%d-%m-%Y")      
+
+    speak("el archivo Generado es : \n") 
+    cadena_json_pretty = json.dumps(llamada, indent=4)
+    print(cadena_json_pretty)
     
     return "Vamos a reservar tu vuelo."
  

@@ -1,6 +1,6 @@
 #FlightChatBot
 
-Este chatbot esta optimizado para mac, en windows por el momento solo serviria en modo texto
+Este chatbot esta optimizado para mac, en windows por el momento esta en modo beta, aun presenta algunas fallas de funcionamiento
 
 2.- Entrar a la carpeta FligthChatbot:
 
