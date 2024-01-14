@@ -15,9 +15,13 @@ import json
 
 nlp = spacy.load("es_core_news_sm")
 is_talked = False
-is_call_printed = True
-is_log_printed = True
+is_call_printed = False
+is_log_printed = False
 
+def set_if_is_talked(talked):
+    global is_talked
+    is_talked = talked
+    
 def print_call(request):
     if is_call_printed:
         print(request)
@@ -34,7 +38,7 @@ def quitar_acentos(texto):
     return ''.join([c for c in texto_normalizado if not unicodedata.combining(c)])
 
 def get_airports(text):
-    #TODO: get api_key and api_secret from environment variables
+    #TODO: get api_key and api_secret from environment variables, in case of expiration, get new ones from https://www.air-port-codes.com/ or use commented ones
     api_key = '098aad84c5'
     api_secret ='c12d1f455daa01a'
    # api_key = '3ef88b63e1'
